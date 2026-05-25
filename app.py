@@ -13,14 +13,16 @@ from sklearn.preprocessing import StandardScaler
 
 st.set_page_config(
     page_title="AURAVERDE AI Dashboard",
-    layout="wide"
+    page_icon="🌱",
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
 
-st.title("AURAVERDE Intelligent Aquaponics Dashboard")
+st.markdown("""
+# 🌱 AURAVERDE Intelligent Aquaponics Platform
 
-# ---------------------------
-# LOAD DATA
-# ---------------------------
+### AI + IoT + Sustainability Analytics
+""")
 
 data = pd.read_csv(
     "auraverde_water_quality_dataset.csv"
@@ -179,26 +181,24 @@ if len(recommendations) == 0:
 col1, col2, col3 = st.columns(3)
 
 with col1:
-    st.metric(
-        "Predicted System Health",
-        round(prediction, 2)
+    st.success(
+        f"Predicted Health: {round(prediction,2)}"
     )
 
 with col2:
-    st.metric(
-        "Sustainability Score",
-        round(sustainability_score, 2)
+    st.info(
+        f"Sustainability Score: {round(sustainability_score,2)}"
     )
 
 with col3:
+
     risk = "LOW"
 
     if ammonia > 1 or do < 5:
         risk = "HIGH"
 
-    st.metric(
-        "Risk Level",
-        risk
+    st.warning(
+        f"Risk Level: {risk}"
     )
 
 # ---------------------------
@@ -206,6 +206,10 @@ with col3:
 # ---------------------------
 
 st.subheader("AI Recommendations")
+st.sidebar.image(
+    "https://cdn-icons-png.flaticon.com/512/2909/2909763.png",
+    width=120
+)
 
 for rec in recommendations:
     st.write("•", rec)
