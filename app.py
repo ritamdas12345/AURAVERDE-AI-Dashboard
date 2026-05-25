@@ -1,10 +1,10 @@
 from streamlit_autorefresh import st_autorefresh
+
 import streamlit as st
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import shap
-import time
 import random
 
 from sklearn.ensemble import RandomForestRegressor
@@ -21,50 +21,20 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
+
+# ---------------------------
+# AUTO REFRESH
+# ---------------------------
+
 st_autorefresh(
     interval=3000,
     key="iot_simulation"
 )
-st.markdown("""
-# 🌱 AURAVERDE Intelligent Aquaponics Platform
 
-### AI + IoT + Sustainability Analytics
-""")
-st.subheader("📡 Real-Time IoT Sensor Feed")
+# ---------------------------
+# LOAD DATA
+# ---------------------------
 
-sensor1, sensor2, sensor3 = st.columns(3)
-
-with sensor1:
-    st.metric(
-        "Live pH",
-        round(live_pH, 2)
-    )
-
-with sensor2:
-    st.metric(
-        "Live Temperature",
-        round(live_temp, 2)
-    )
-
-with sensor3:
-    st.metric(
-        "Live Dissolved Oxygen",
-        round(live_do, 2)
-    )
-
-sensor4, sensor5 = st.columns(2)
-
-with sensor4:
-    st.metric(
-        "Live Turbidity",
-        round(live_turbidity, 2)
-    )
-
-with sensor5:
-    st.metric(
-        "Live Ammonia",
-        round(live_ammonia, 2)
-    )
 data = pd.read_csv(
     "auraverde_water_quality_dataset.csv"
 )
@@ -90,25 +60,41 @@ X = data.drop(
 y = data["system_health"]
 
 X_train, X_test, y_train, y_test = train_test_split(
-    X, y
+    X,
+    y,
+    test_size=0.2,
+    random_state=42
 )
 
 scaler = StandardScaler()
 
 X_train_scaled = scaler.fit_transform(X_train)
 
-model = RandomForestRegressor()
+model = RandomForestRegressor(
+    random_state=42
+)
 
 model.fit(
     X_train_scaled,
     y_train
 )
-explainer = shap.TreeExplainer(model)
+
 # ---------------------------
-# SIDEBAR INPUTS
+# SHAP EXPLAINER
+# ---------------------------
+
+explainer = shap.TreeExplainer(model)
+
+# ---------------------------
+# SIDEBAR
 # ---------------------------
 
 st.sidebar.header("Input Parameters")
+
+st.sidebar.image(
+    "https://cdn-icons-png.flaticon.com/512/2909/2909763.png",
+    width=120
+)
 
 pH = st.sidebar.slider(
     "pH",
@@ -146,9 +132,6 @@ ammonia = st.sidebar.slider(
 )
 
 # ---------------------------
-# CREATE INPUT DATAFRAME
-# ---------------------------
-# ---------------------------
 # REAL-TIME IoT SIMULATION
 # ---------------------------
 
@@ -162,17 +145,60 @@ live_turbidity = turbidity + random.uniform(-0.5, 0.5)
 
 live_ammonia = ammonia + random.uniform(-0.2, 0.2)
 
+# ---------------------------
+# DASHBOARD TITLE
+# ---------------------------
+
+st.markdown("""
+# 🌱 AURAVERDE Intelligent Aquaponics Platform
+
+### AI + IoT + Sustainability Analytics
+""")
 
 # ---------------------------
-# PREDICTION
+# LIVE IoT SENSOR FEED
 # ---------------------------
 
-scaled_input = scaler.transform(input_data)
+st.subheader("📡 Real-Time IoT Sensor Feed")
 
-prediction = model.predict(scaled_input)[0]
-shap_values = explainer.shap_values(
-    scaled_input
-)
+sensor1, sensor2, sensor3 = st.columns(3)
+
+with sensor1:
+    st.metric(
+        "Live pH",
+        round(live_pH, 2)
+    )
+
+with sensor2:
+    st.metric(
+        "Live Temperature",
+        round(live_temp, 2)
+    )
+
+with sensor3:
+    st.metric(
+        "Live Dissolved Oxygen",
+        round(live_do, 2)
+    )
+
+sensor4, sensor5 = st.columns(2)
+
+with sensor4:
+    st.metric(
+        "Live Turbidity",
+        round(live_turbidity, 2)
+    )
+
+with sensor5:
+    st.metric(
+        "Live Ammonia",
+        round(live_ammonia, 2)
+    )
+
+# ---------------------------
+# CREATE INPUT DATAFRAME
+# ---------------------------
+
 input_data = pd.DataFrame({
     "pH": [live_pH],
     "temperature_C": [live_temp],
@@ -180,18 +206,36 @@ input_data = pd.DataFrame({
     "turbidity_NTU": [live_turbidity],
     "ammonia_mg_L": [live_ammonia]
 })
+
+# ---------------------------
+# PREDICTION
+# ---------------------------
+
+scaled_input = scaler.transform(input_data)
+
+prediction = model.predict(
+    scaled_input
+)[0]
+
+# ---------------------------
+# SHAP VALUES
+# ---------------------------
+
+shap_values = explainer.shap_values(
+    scaled_input
+)
+
 # ---------------------------
 # SUSTAINABILITY SCORE
 # ---------------------------
 
 water_quality = (
-    pH + do
+    live_pH + live_do
 ) / 2
 
 score = (
-    0.7 * water_quality
-    -
-    0.3 * ammonia
+    0.7 * water_quality -
+    0.3 * live_ammonia
 )
 
 sustainability_score = max(
@@ -200,27 +244,27 @@ sustainability_score = max(
 )
 
 # ---------------------------
-# AI RECOMMENDATION
+# AI RECOMMENDATIONS
 # ---------------------------
 
 recommendations = []
 
-if do < 5:
+if live_do < 5:
     recommendations.append(
         "Increase aeration"
     )
 
-if ammonia > 1:
+if live_ammonia > 1:
     recommendations.append(
         "Replace/filter water"
     )
 
-if pH < 6.5:
+if live_pH < 6.5:
     recommendations.append(
         "Add pH buffer"
     )
 
-if turbidity > 5:
+if live_turbidity > 5:
     recommendations.append(
         "Clean filtration system"
     )
@@ -229,6 +273,47 @@ if len(recommendations) == 0:
     recommendations.append(
         "System stable"
     )
+
+# ---------------------------
+# DISPLAY RESULTS
+# ---------------------------
+
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    st.success(
+        f"Predicted Health: {round(prediction, 2)}"
+    )
+
+with col2:
+    st.info(
+        f"Sustainability Score: {round(sustainability_score, 2)}"
+    )
+
+with col3:
+
+    risk = "LOW"
+
+    if live_ammonia > 1 or live_do < 5:
+        risk = "HIGH"
+
+    st.warning(
+        f"Risk Level: {risk}"
+    )
+
+# ---------------------------
+# AI RECOMMENDATIONS
+# ---------------------------
+
+st.subheader("🤖 AI Recommendations")
+
+for rec in recommendations:
+    st.write("•", rec)
+
+# ---------------------------
+# SHAP VISUALIZATION
+# ---------------------------
+
 st.subheader("🔍 Explainable AI Analysis")
 
 fig_shap, ax = plt.subplots()
@@ -240,73 +325,28 @@ shap.summary_plot(
 )
 
 st.pyplot(fig_shap)
-# ---------------------------
-# DISPLAY RESULTS
-# ---------------------------
-
-col1, col2, col3 = st.columns(3)
-
-with col1:
-    st.success(
-        f"Predicted Health: {round(prediction,2)}"
-    )
-
-with col2:
-    st.info(
-        f"Sustainability Score: {round(sustainability_score,2)}"
-    )
-
-with col3:
-
-    risk = "LOW"
-
-    if ammonia > 1 or do < 5:
-        risk = "HIGH"
-
-    st.warning(
-        f"Risk Level: {risk}"
-    )
-
-# ---------------------------
-# RECOMMENDATIONS
-# ---------------------------
-
-st.subheader("AI Recommendations")
-st.sidebar.image(
-    "https://cdn-icons-png.flaticon.com/512/2909/2909763.png",
-    width=120
-)
-
-for rec in recommendations:
-    st.write("•", rec)
 
 # ---------------------------
 # DIGITAL TWIN SIMULATION
 # ---------------------------
 
-st.subheader(
-    "Digital Twin Simulation"
-)
+st.subheader("📈 Real-Time Digital Twin")
 
 future = []
 
-current_do = do
+current_do = live_do
 
 for i in range(20):
 
     current_do -= 0.05
 
     health = (
-        0.3 * pH
-        +
-        0.4 * current_do
-        -
-        0.3 * ammonia
+        0.3 * live_pH +
+        0.4 * current_do -
+        0.3 * live_ammonia
     )
 
     future.append(health)
-
-st.subheader("📈 Real-Time Digital Twin")
 
 chart_data = pd.DataFrame(
     future,
