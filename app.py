@@ -240,16 +240,11 @@ for i in range(20):
 
     future.append(health)
 
-fig, ax = plt.subplots()
+st.subheader("📈 Real-Time Digital Twin")
 
-ax.plot(future)
-
-ax.set_title(
-    "Future System Health"
+chart_data = pd.DataFrame(
+    future,
+    columns=["System Health"]
 )
 
-ax.set_xlabel("Time")
-
-ax.set_ylabel("Health")
-
-st.pyplot(fig)
+st.line_chart(chart_data)
