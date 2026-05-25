@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import shap
 
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
@@ -62,7 +63,7 @@ model.fit(
     X_train_scaled,
     y_train
 )
-
+explainer = shap.TreeExplainer(model)
 # ---------------------------
 # SIDEBAR INPUTS
 # ---------------------------
@@ -123,7 +124,9 @@ input_data = pd.DataFrame({
 scaled_input = scaler.transform(input_data)
 
 prediction = model.predict(scaled_input)[0]
-
+shap_values = explainer.shap_values(
+    scaled_input
+)
 # ---------------------------
 # SUSTAINABILITY SCORE
 # ---------------------------
@@ -173,7 +176,17 @@ if len(recommendations) == 0:
     recommendations.append(
         "System stable"
     )
+st.subheader("🔍 Explainable AI Analysis")
 
+fig_shap, ax = plt.subplots()
+
+shap.summary_plot(
+    shap_values,
+    input_data,
+    show=False
+)
+
+st.pyplot(fig_shap)
 # ---------------------------
 # DISPLAY RESULTS
 # ---------------------------
