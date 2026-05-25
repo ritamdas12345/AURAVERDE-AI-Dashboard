@@ -1,8 +1,11 @@
+from streamlit_autorefresh import st_autorefresh
 import streamlit as st
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import shap
+import time
+import random
 
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
@@ -18,13 +21,50 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
-
+st_autorefresh(
+    interval=3000,
+    key="iot_simulation"
+)
 st.markdown("""
 # 🌱 AURAVERDE Intelligent Aquaponics Platform
 
 ### AI + IoT + Sustainability Analytics
 """)
+st.subheader("📡 Real-Time IoT Sensor Feed")
 
+sensor1, sensor2, sensor3 = st.columns(3)
+
+with sensor1:
+    st.metric(
+        "Live pH",
+        round(live_pH, 2)
+    )
+
+with sensor2:
+    st.metric(
+        "Live Temperature",
+        round(live_temp, 2)
+    )
+
+with sensor3:
+    st.metric(
+        "Live Dissolved Oxygen",
+        round(live_do, 2)
+    )
+
+sensor4, sensor5 = st.columns(2)
+
+with sensor4:
+    st.metric(
+        "Live Turbidity",
+        round(live_turbidity, 2)
+    )
+
+with sensor5:
+    st.metric(
+        "Live Ammonia",
+        round(live_ammonia, 2)
+    )
 data = pd.read_csv(
     "auraverde_water_quality_dataset.csv"
 )
@@ -108,14 +148,20 @@ ammonia = st.sidebar.slider(
 # ---------------------------
 # CREATE INPUT DATAFRAME
 # ---------------------------
+# ---------------------------
+# REAL-TIME IoT SIMULATION
+# ---------------------------
 
-input_data = pd.DataFrame({
-    "pH": [pH],
-    "temperature_C": [temperature],
-    "dissolved_oxygen_mg_L": [do],
-    "turbidity_NTU": [turbidity],
-    "ammonia_mg_L": [ammonia]
-})
+live_pH = pH + random.uniform(-0.3, 0.3)
+
+live_temp = temperature + random.uniform(-1, 1)
+
+live_do = do + random.uniform(-0.5, 0.5)
+
+live_turbidity = turbidity + random.uniform(-0.5, 0.5)
+
+live_ammonia = ammonia + random.uniform(-0.2, 0.2)
+
 
 # ---------------------------
 # PREDICTION
@@ -127,6 +173,13 @@ prediction = model.predict(scaled_input)[0]
 shap_values = explainer.shap_values(
     scaled_input
 )
+input_data = pd.DataFrame({
+    "pH": [live_pH],
+    "temperature_C": [live_temp],
+    "dissolved_oxygen_mg_L": [live_do],
+    "turbidity_NTU": [live_turbidity],
+    "ammonia_mg_L": [live_ammonia]
+})
 # ---------------------------
 # SUSTAINABILITY SCORE
 # ---------------------------
