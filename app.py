@@ -488,7 +488,7 @@ else:
         st.error(anomaly)
 
 # ---------------------------
-# GEMINI AI CHATBOT
+# Groq AI CHATBOT
 # ---------------------------
 
 st.header("🤖 AURAVERDE AI Assistant")
@@ -534,7 +534,7 @@ if user_question:
                     "content": prompt,
                 }
             ],
-            model="llama3-8b-8192",
+            model="llama-3.1-8b-instant",
         )
 
         reply = chat_completion.choices[0].message.content
