@@ -112,11 +112,7 @@ model_accuracy = r2_score(
 # SHAP EXPLAINER
 # ---------------------------
 
-@st.cache_resource
-def create_explainer(model):
-    return shap.TreeExplainer(model)
-
-explainer = create_explainer(model)
+explainer = shap.TreeExplainer(model)
 
 # ---------------------------
 # SIDEBAR
