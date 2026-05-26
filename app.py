@@ -1,3 +1,4 @@
+import google.generativeai as genai
 from streamlit_autorefresh import st_autorefresh
 
 import streamlit as st
@@ -11,6 +12,20 @@ from sklearn.metrics import r2_score
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
+
+# ---------------------------
+# GEMINI API CONFIGURATION
+# ---------------------------
+
+GEMINI_API_KEY = st.secrets["GEMINI_API_KEY"]
+
+genai.configure(
+    api_key=GEMINI_API_KEY
+)
+
+gemini_model = genai.GenerativeModel(
+    "gemini-1.5-flash"
+)
 
 # ---------------------------
 # PAGE CONFIG
@@ -367,6 +382,9 @@ st.line_chart(chart_data)
 # ---------------------------
 
 st.header("📊 Project Analytics Section")
+
+# Analytics Metrics
+
 analytics1, analytics2 = st.columns(2)
 
 with analytics1:
@@ -380,8 +398,14 @@ with analytics2:
         "Dataset Size",
         len(data)
     )
-    st.subheader("📌 Feature Importance Analysis")
-    importance_df = pd.DataFrame({
+
+# ---------------------------
+# FEATURE IMPORTANCE
+# ---------------------------
+
+st.subheader("📌 Feature Importance Analysis")
+
+importance_df = pd.DataFrame({
     "Feature": X.columns,
     "Importance": model.feature_importances_
 })
@@ -390,10 +414,17 @@ importance_df = importance_df.sort_values(
     by="Importance",
     ascending=False
 )
+
 st.bar_chart(
     importance_df.set_index("Feature")
 )
+
+# ---------------------------
+# SUSTAINABILITY TREND
+# ---------------------------
+
 st.subheader("🌍 Sustainability Trend Analysis")
+
 trend = []
 
 base_score = sustainability_score
@@ -403,12 +434,20 @@ for i in range(30):
     base_score += random.uniform(-2, 2)
 
     trend.append(base_score)
-    trend_df = pd.DataFrame(
+
+trend_df = pd.DataFrame(
     trend,
     columns=["Sustainability Score"]
 )
+
 st.line_chart(trend_df)
+
+# ---------------------------
+# RISK DISTRIBUTION
+# ---------------------------
+
 st.subheader("⚠️ Risk Distribution")
+
 risk_data = pd.DataFrame({
     "Risk Level": ["Low", "Medium", "High"],
     "Systems": [65, 25, 10]
@@ -417,7 +456,13 @@ risk_data = pd.DataFrame({
 st.bar_chart(
     risk_data.set_index("Risk Level")
 )
+
+# ---------------------------
+# ANOMALY DETECTION
+# ---------------------------
+
 st.subheader("🚨 Anomaly Detection")
+
 anomalies = []
 
 if live_ammonia > 1.5:
@@ -436,6 +481,7 @@ if live_temp > 35:
     )
 
 if len(anomalies) == 0:
+
     st.success(
         "No anomalies detected"
     )
@@ -444,54 +490,55 @@ else:
 
     for anomaly in anomalies:
         st.error(anomaly)
+
 # ---------------------------
-# AI CHATBOT ASSISTANT
+# GEMINI AI CHATBOT
 # ---------------------------
 
-st.subheader("🤖 AURAVERDE AI Assistant")
+st.header("🤖 AURAVERDE AI Assistant")
+
 user_question = st.text_input(
     "Ask the AI assistant about the system"
 )
+
 if user_question:
 
-    question = user_question.lower()
+    prompt = f"""
+    You are an AI assistant for the AURAVERDE Intelligent Aquaponics Platform.
 
-    if "oxygen" in question:
-        st.write(
-            "Dissolved oxygen is essential for fish survival and water quality stability."
+    Current system conditions:
+
+    pH: {round(live_pH,2)}
+    Temperature: {round(live_temp,2)}
+    Dissolved Oxygen: {round(live_do,2)}
+    Turbidity: {round(live_turbidity,2)}
+    Ammonia: {round(live_ammonia,2)}
+
+    Sustainability Score:
+    {round(sustainability_score,2)}
+
+    Predicted Health:
+    {round(prediction,2)}
+
+    Risk Level:
+    {risk}
+
+    User Question:
+    {user_question}
+
+    Give a professional, concise, and technically accurate response.
+    """
+
+    try:
+
+        response = gemini_model.generate_content(
+            prompt
         )
 
-    elif "ammonia" in question:
-        st.write(
-            "High ammonia levels are harmful for aquatic life. Consider filtration or water replacement."
-        )
+        st.write(response.text)
 
-    elif "ph" in question:
-        st.write(
-            "pH imbalance can affect nutrient absorption and aquatic ecosystem stability."
-        )
+    except Exception as e:
 
-    elif "temperature" in question:
-        st.write(
-            "Temperature influences fish metabolism and dissolved oxygen concentration."
-        )
-
-    elif "sustainability" in question:
-        st.write(
-            "The sustainability score is calculated using water quality and environmental stability indicators."
-        )
-
-    elif "health" in question:
-        st.write(
-            f"The current predicted system health is {round(prediction,2)}."
-        )
-
-    elif "risk" in question:
-        st.write(
-            f"The current system risk level is {risk}."
-        )
-
-    else:
-        st.write(
-            "System operating normally. Please ask about pH, oxygen, ammonia, sustainability, or risk."
+        st.error(
+            f"Gemini API Error: {e}"
         )
