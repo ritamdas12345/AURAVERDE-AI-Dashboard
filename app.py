@@ -536,7 +536,7 @@ Give a short professional answer.
                     "content": prompt,
                 }
             ],
-           model="gemma2-9b-it",
+           model="llama-3.3-70b-versatile",
            max_tokens=120,
 temperature=0.4,
         )
