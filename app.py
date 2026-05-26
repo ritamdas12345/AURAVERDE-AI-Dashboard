@@ -354,3 +354,54 @@ chart_data = pd.DataFrame(
 )
 
 st.line_chart(chart_data)
+# ---------------------------
+# AI CHATBOT ASSISTANT
+# ---------------------------
+
+st.subheader("🤖 AURAVERDE AI Assistant")
+user_question = st.text_input(
+    "Ask the AI assistant about the system"
+)
+if user_question:
+
+    question = user_question.lower()
+
+    if "oxygen" in question:
+        st.write(
+            "Dissolved oxygen is essential for fish survival and water quality stability."
+        )
+
+    elif "ammonia" in question:
+        st.write(
+            "High ammonia levels are harmful for aquatic life. Consider filtration or water replacement."
+        )
+
+    elif "ph" in question:
+        st.write(
+            "pH imbalance can affect nutrient absorption and aquatic ecosystem stability."
+        )
+
+    elif "temperature" in question:
+        st.write(
+            "Temperature influences fish metabolism and dissolved oxygen concentration."
+        )
+
+    elif "sustainability" in question:
+        st.write(
+            "The sustainability score is calculated using water quality and environmental stability indicators."
+        )
+
+    elif "health" in question:
+        st.write(
+            f"The current predicted system health is {round(prediction,2)}."
+        )
+
+    elif "risk" in question:
+        st.write(
+            f"The current system risk level is {risk}."
+        )
+
+    else:
+        st.write(
+            "System operating normally. Please ask about pH, oxygen, ammonia, sustainability, or risk."
+        )
