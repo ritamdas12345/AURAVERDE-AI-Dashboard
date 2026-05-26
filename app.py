@@ -1,4 +1,4 @@
-import google.generativeai as genai
+from groq import Groq
 from streamlit_autorefresh import st_autorefresh
 
 import streamlit as st
@@ -14,17 +14,13 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 
 # ---------------------------
-# GEMINI API CONFIGURATION
+# GROQ API CONFIGURATION
 # ---------------------------
 
-GEMINI_API_KEY = st.secrets["GEMINI_API_KEY"]
+GROQ_API_KEY = st.secrets["GROQ_API_KEY"]
 
-genai.configure(
-    api_key=GEMINI_API_KEY
-)
-
-gemini_model = genai.GenerativeModel(
-    "gemini-2.0-flash"
+client = Groq(
+    api_key=GROQ_API_KEY
 )
 
 # ---------------------------
@@ -531,14 +527,20 @@ if user_question:
 
     try:
 
-        response = gemini_model.generate_content(
-            prompt
+        chat_completion = client.chat.completions.create(
+            messages=[
+                {
+                    "role": "user",
+                    "content": prompt,
+                }
+            ],
+            model="llama3-8b-8192",
         )
 
-        st.write(response.text)
+        reply = chat_completion.choices[0].message.content
+
+        st.write(reply)
 
     except Exception as e:
 
-        st.error(
-            f"Gemini API Error: {e}"
-        )
+        st.error(f"Groq API Error: {e}")
