@@ -52,4 +52,12 @@ Interactive Streamlit Dashboard
 
 AI Chatbot Assistant
 
+ 🏗️ System Architecture
+
+![Architecture Diagram](architecture_diagram.png)
+
+ 🔄 Workflow Diagram
+
+![Workflow Diagram](workflow_diagram.png)
+
 to create a smart decision-support platform for sustainable aquaponics management.
