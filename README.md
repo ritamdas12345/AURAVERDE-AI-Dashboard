@@ -60,4 +60,75 @@ AI Chatbot Assistant
 
 ![Workflow Diagram](workflow_diagram.png)
 
-to create a smart decision-support platform for sustainable aquaponics management.
+ 🛠️ Technology Stack
+
+| Category | Technologies |
+|---|---|
+| Programming Language | Python |
+| Dashboard | Streamlit |
+| Machine Learning | Scikit-learn |
+| Explainable AI | SHAP |
+| Data Processing | Pandas, NumPy |
+| Visualization | Matplotlib |
+| Deployment | Streamlit Cloud |
+| Version Control | GitHub |
+
+ 🧠 Machine Learning Components
+
+ ✔ Random Forest Regressor
+Used for predicting overall aquaponics system health.
+
+ ✔ SHAP Explainability
+Used to interpret the contribution of environmental parameters toward model predictions.
+
+ ✔ Digital Twin Simulation
+Simulates future system behavior and environmental dynamics.
+
+ ✔ Anomaly Detection
+Detects abnormal conditions such as ammonia spikes or oxygen depletion.
+
+ ✔ AI Recommendation Engine
+Provides actionable recommendations based on real-time environmental conditions to create a smart decision-support platform for sustainable aquaponics management.
+
+ 📊 Dashboard Features
+
+- Real-Time Sensor Feed
+- Interactive Digital Twin Graph
+- SHAP Explainability Visualization
+- Sustainability Trend Analysis
+- Feature Importance Analysis
+- Risk Distribution Analytics
+- AI Chatbot Assistant
+- Automated AI Recommendations
+
+## ☁️ Live Deployment
+
+Streamlit Dashboard Link:
+[Click Here](https://auraverde-ai-dashboard-dbrhsrj6dbgcuzmeuyc36a.streamlit.app/)
+
+
+ 🔮 Future Scope
+
+- Integration with real IoT hardware sensors
+- Firebase/MQTT-based real-time cloud telemetry
+- Mobile application development
+- Advanced Deep Learning models
+- AI-powered automated control systems
+- Blockchain-enabled sustainability tracking
+
+
+ ▶️ How to Run Locally
+
+ Clone Repository
+
+git clone (https://auraverde-ai-dashboard-dbrhsrj6dbgcuzmeuyc36a.streamlit.app/)
+pip install -r requirements.txt
+streamlit run app.py
+
+👨‍💻 Authors
+
+Developed by:
+- Ritam Das
+
+
+
