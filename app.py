@@ -82,11 +82,21 @@ scaler = StandardScaler()
 
 X_train_scaled = scaler.fit_transform(X_train)
 
-model = RandomForestRegressor(
-    random_state=42
-)
+@st.cache_resource
+def train_model(X_train_scaled, y_train):
 
-model.fit(
+    model = RandomForestRegressor(
+        random_state=42
+    )
+
+    model.fit(
+        X_train_scaled,
+        y_train
+    )
+
+    return model
+
+model = train_model(
     X_train_scaled,
     y_train
 )
@@ -102,7 +112,11 @@ model_accuracy = r2_score(
 # SHAP EXPLAINER
 # ---------------------------
 
-explainer = shap.TreeExplainer(model)
+@st.cache_resource
+def create_explainer(model):
+    return shap.TreeExplainer(model)
+
+explainer = create_explainer(model)
 
 # ---------------------------
 # SIDEBAR
@@ -500,30 +514,22 @@ user_question = st.text_input(
 if user_question:
 
     prompt = f"""
-    You are an AI assistant for the AURAVERDE Intelligent Aquaponics Platform.
+Aquaponics AI Assistant.
 
-    Current system conditions:
+Current Conditions:
+pH: {round(live_pH,2)}
+Temp: {round(live_temp,2)}
+DO: {round(live_do,2)}
+Ammonia: {round(live_ammonia,2)}
+Sustainability Score: {round(sustainability_score,2)}
+Health: {round(prediction,2)}
+Risk: {risk}
 
-    pH: {round(live_pH,2)}
-    Temperature: {round(live_temp,2)}
-    Dissolved Oxygen: {round(live_do,2)}
-    Turbidity: {round(live_turbidity,2)}
-    Ammonia: {round(live_ammonia,2)}
+User Question:
+{user_question}
 
-    Sustainability Score:
-    {round(sustainability_score,2)}
-
-    Predicted Health:
-    {round(prediction,2)}
-
-    Risk Level:
-    {risk}
-
-    User Question:
-    {user_question}
-
-    Give a professional, concise, and technically accurate response.
-    """
+Give a short professional answer.
+"""
 
     try:
 
@@ -534,7 +540,9 @@ if user_question:
                     "content": prompt,
                 }
             ],
-            model="llama-3.1-8b-instant",
+           model="gemma2-9b-it",
+           max_tokens=120,
+temperature=0.4,
         )
 
         reply = chat_completion.choices[0].message.content
