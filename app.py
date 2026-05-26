@@ -6,6 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import shap
 import random
+from sklearn.metrics import r2_score
 
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
@@ -78,7 +79,14 @@ model.fit(
     X_train_scaled,
     y_train
 )
+X_test_scaled = scaler.transform(X_test)
 
+y_pred_test = model.predict(X_test_scaled)
+
+model_accuracy = r2_score(
+    y_test,
+    y_pred_test
+)
 # ---------------------------
 # SHAP EXPLAINER
 # ---------------------------
@@ -354,6 +362,88 @@ chart_data = pd.DataFrame(
 )
 
 st.line_chart(chart_data)
+# ---------------------------
+# PROJECT ANALYTICS
+# ---------------------------
+
+st.header("📊 Project Analytics Section")
+analytics1, analytics2 = st.columns(2)
+
+with analytics1:
+    st.metric(
+        "Model Accuracy (R² Score)",
+        round(model_accuracy, 3)
+    )
+
+with analytics2:
+    st.metric(
+        "Dataset Size",
+        len(data)
+    )
+    st.subheader("📌 Feature Importance Analysis")
+    importance_df = pd.DataFrame({
+    "Feature": X.columns,
+    "Importance": model.feature_importances_
+})
+
+importance_df = importance_df.sort_values(
+    by="Importance",
+    ascending=False
+)
+st.bar_chart(
+    importance_df.set_index("Feature")
+)
+st.subheader("🌍 Sustainability Trend Analysis")
+trend = []
+
+base_score = sustainability_score
+
+for i in range(30):
+
+    base_score += random.uniform(-2, 2)
+
+    trend.append(base_score)
+    trend_df = pd.DataFrame(
+    trend,
+    columns=["Sustainability Score"]
+)
+st.line_chart(trend_df)
+st.subheader("⚠️ Risk Distribution")
+risk_data = pd.DataFrame({
+    "Risk Level": ["Low", "Medium", "High"],
+    "Systems": [65, 25, 10]
+})
+
+st.bar_chart(
+    risk_data.set_index("Risk Level")
+)
+st.subheader("🚨 Anomaly Detection")
+anomalies = []
+
+if live_ammonia > 1.5:
+    anomalies.append(
+        "Critical ammonia spike detected"
+    )
+
+if live_do < 4:
+    anomalies.append(
+        "Low dissolved oxygen anomaly detected"
+    )
+
+if live_temp > 35:
+    anomalies.append(
+        "High temperature anomaly detected"
+    )
+
+if len(anomalies) == 0:
+    st.success(
+        "No anomalies detected"
+    )
+
+else:
+
+    for anomaly in anomalies:
+        st.error(anomaly)
 # ---------------------------
 # AI CHATBOT ASSISTANT
 # ---------------------------
